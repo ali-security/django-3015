@@ -1,0 +1,38 @@
+
+name: "CI"
+on: [push]
+
+jobs:
+  ci:
+    name: "CI"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: MatteoH2O1999/setup-python@v1
+        with: 
+          python-version: 3.6 # TODO: more?
+      # TODO: more tests?
+      - name: "Test"
+        run: |
+            echo "testing"
+            cd tests
+            pip install -e .. --index-url "https://:2021-04-12T22:17:14.391Z@time-machines-pypi.sealsecurity.io/"
+            pip install -r requirements/py3.txt --index-url "https://:2021-04-12T22:17:14.391Z@time-machines-pypi.sealsecurity.io/"
+            python ./runtests.py
+      - name: "Build"
+        run: |
+            echo "building"
+            pip wheel .
+            python setup.py sdist
+      - name: "Upload wheels"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "wheels"
+          path: "*.whl"
+      - name: "Upload dist"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "dist"
+          path: "*.tar.gz"
